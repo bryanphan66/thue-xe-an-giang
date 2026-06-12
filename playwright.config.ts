@@ -20,5 +20,8 @@ export default defineConfig({
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // Ép chế độ fixtures: E2E cô lập, KHÔNG đọc/ghi vào Supabase thật
+    // (tránh form đối tác ghi rác vào partner_inquiries mỗi lần test).
+    env: { NEXT_PUBLIC_SUPABASE_URL: "", NEXT_PUBLIC_SUPABASE_ANON_KEY: "" },
   },
 });
