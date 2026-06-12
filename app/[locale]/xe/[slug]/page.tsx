@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Users } from "lucide-react";
+import { Users, Camera } from "lucide-react";
 import { getCar, getCars } from "@/lib/data";
 import { BRAND } from "@/config/brand";
 import { carJsonLd } from "@/lib/seo";
@@ -16,10 +17,8 @@ import PriceTable from "@/components/PriceTable";
 import OwnerCard from "@/components/OwnerCard";
 import DetailCta from "@/components/DetailCta";
 
-// Model mẫu khi xe chưa có .glb thật.
-// TODO: thay .glb xe thật
-const CAR_MODEL_URL =
-  "https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/ToyCar/glTF-Binary/ToyCar.glb";
+// Nền "sân khấu" tối dùng chung cho khu vực hero (3D / 360 / ảnh / placeholder).
+const STAGE_BG = "radial-gradient(120% 90% at 50% 18%, #1b1c20 0%, #0B0B0C 62%)";
 
 // ISR: chi tiết xe render lại sau 60s; xe mới thêm trong Supabase tự render khi có người mở.
 export const revalidate = 60;
@@ -72,14 +71,36 @@ export default async function CarDetailPage({
       <BackBar name={car.name} />
 
       {car.spinFrames && car.spinFrames.length >= 8 ? (
-        // Có ảnh xoay 360° thật → ưu tiên (nhẹ, đúng xe thật).
+        // 1) Ảnh xoay 360° thật → ưu tiên (nhẹ, đúng xe thật).
         <Car360 frames={car.spinFrames} name={car.name} />
+      ) : car.model3dUrl ? (
+        // 2) Chủ xe đã gắn model .glb thật.
+        <Car3DViewer src={car.model3dUrl} poster={car.posterUrl ?? undefined} name={car.name} />
+      ) : car.photoUrls && car.photoUrls.length > 0 ? (
+        // 3) Có ảnh thật → ảnh lớn trên sân khấu.
+        <section className="relative h-[420px] bg-stage" style={{ background: STAGE_BG }}>
+          <Image
+            src={car.photoUrls[0]}
+            alt={car.name}
+            fill
+            sizes="100vw"
+            priority
+            style={{ objectFit: "cover" }}
+          />
+        </section>
       ) : (
-        <Car3DViewer
-          src={car.model3dUrl ?? CAR_MODEL_URL}
-          poster={car.posterUrl ?? undefined}
-          name={car.name}
-        />
+        // 4) Chưa có gì → placeholder sạch (KHÔNG hiện model mẫu/đồ chơi).
+        <section
+          className="relative grid h-[420px] place-items-center bg-stage"
+          style={{ background: STAGE_BG }}
+        >
+          <div className="flex flex-col items-center gap-3 text-stage-muted">
+            <Camera size={30} strokeWidth={1.5} />
+            <span className="font-mono text-[12px] uppercase tracking-[.06em]">
+              {t("heroPending")}
+            </span>
+          </div>
+        </section>
       )}
 
       <div className="container" style={{ paddingTop: 26 }}>

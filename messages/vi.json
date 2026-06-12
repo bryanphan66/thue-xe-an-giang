@@ -72,6 +72,7 @@
   "detail": {
     "model3d": "Mô hình 3D",
     "spin360": "Ảnh xoay 360°",
+    "heroPending": "Ảnh xe đang cập nhật",
     "gestureHint": "Vuốt để xoay · chụm để zoom",
     "gestureHintSpin": "Vuốt ngang để xoay xe",
     "ar": "Xem trong sân nhà bạn",

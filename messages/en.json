@@ -72,6 +72,7 @@
   "detail": {
     "model3d": "3D model",
     "spin360": "360° spin",
+    "heroPending": "Car photos coming soon",
     "gestureHint": "Swipe to rotate · pinch to zoom",
     "gestureHintSpin": "Swipe sideways to rotate the car",
     "ar": "View in your yard",
