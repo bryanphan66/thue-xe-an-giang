@@ -3,7 +3,7 @@ import Image from "next/image";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Users, Camera } from "lucide-react";
-import { getCar, getCars } from "@/lib/data";
+import { getCar } from "@/lib/data";
 import { BRAND } from "@/config/brand";
 import { carJsonLd } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
@@ -20,13 +20,8 @@ import DetailCta from "@/components/DetailCta";
 // Nền "sân khấu" tối dùng chung cho khu vực hero (3D / 360 / ảnh / placeholder).
 const STAGE_BG = "radial-gradient(120% 90% at 50% 18%, #1b1c20 0%, #0B0B0C 62%)";
 
-// ISR: chi tiết xe render lại sau 60s; xe mới thêm trong Supabase tự render khi có người mở.
-export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const cars = await getCars();
-  return cars.map((car) => ({ slug: car.slug }));
-}
+// Đọc Supabase lúc RUNTIME → xe mới / sửa giá / gắn model hiện ngay, không cần deploy lại.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

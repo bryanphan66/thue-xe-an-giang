@@ -8,8 +8,9 @@ import PartnerSection from "@/components/PartnerSection";
 import LocationSection from "@/components/LocationSection";
 import Footer from "@/components/Footer";
 
-// ISR: render lại sau mỗi 60s → sửa dữ liệu trong Supabase tự hiện, không cần deploy lại.
-export const revalidate = 60;
+// Đọc Supabase phía server lúc RUNTIME (không nướng cứng lúc build) →
+// sửa dữ liệu trong Supabase là web đổi ngay, không cần deploy lại.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage({
   params,
