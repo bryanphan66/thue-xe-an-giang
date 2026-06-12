@@ -22,9 +22,11 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(opts?: {
     const el = ref.current;
     if (!el) return;
 
+    // Môi trường không hỗ trợ IntersectionObserver → hiện ngay (async để tránh
+    // cascading render đồng bộ trong effect).
     if (typeof IntersectionObserver === "undefined") {
-      setShown(true);
-      return;
+      const id = window.setTimeout(() => setShown(true), 0);
+      return () => window.clearTimeout(id);
     }
 
     const io = new IntersectionObserver(

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Design handoff is reference material, not project source.
+    "design_handoff_thue_xe/**",
   ]),
 ]);
 
