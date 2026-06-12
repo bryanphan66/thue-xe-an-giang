@@ -1,8 +1,13 @@
 import { setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
+import Hero from "@/components/Hero";
+import ServiceTypes from "@/components/ServiceTypes";
+import CarList from "@/components/CarList";
+import DriveOptions from "@/components/DriveOptions";
+import Testimonials from "@/components/Testimonials";
+import PartnerSection from "@/components/PartnerSection";
+import LocationSection from "@/components/LocationSection";
+import Footer from "@/components/Footer";
 
-// Placeholder tạm để xác minh boot + redirect locale.
-// Sẽ thay bằng các section trang chủ (Hero, ServiceTypes, ...) ở giai đoạn sau.
 export default async function HomePage({
   params,
 }: {
@@ -10,19 +15,17 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <Placeholder />;
-}
 
-function Placeholder() {
-  const t = useTranslations("hero");
   return (
-    <main className="container section">
-      <h1 className="display">
-        {t("line1")} {t("line2")} {t("line3")}
-      </h1>
-      <p className="lead" style={{ marginTop: 16 }}>
-        {t("lead")}
-      </p>
+    <main className="screen">
+      <Hero />
+      <ServiceTypes />
+      <CarList />
+      <DriveOptions />
+      <Testimonials />
+      <PartnerSection />
+      <LocationSection />
+      <Footer />
     </main>
   );
 }
