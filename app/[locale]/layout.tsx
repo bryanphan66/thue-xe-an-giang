@@ -36,7 +36,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "hero" });
-  const title = `${BRAND.name} — Cho thuê xe ${BRAND.address.split(",").slice(-2).join(",").trim()}`;
+  // Tên thương hiệu đã chứa đủ địa danh + dịch vụ → dùng thẳng làm tiêu đề (khỏi lặp).
+  const title = BRAND.name;
   const description = t("lead");
   return {
     metadataBase: new URL(BRAND.siteUrl),

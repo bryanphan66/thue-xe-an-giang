@@ -2,7 +2,7 @@
  * Mọi thông tin thương hiệu/liên hệ ở MỘT chỗ — đổi tại đây, không hardcode rải rác.
  */
 export const BRAND = {
-  name: "Thuê Xe An Giang",
+  name: "Dịch vụ cho thuê xe Thạnh Mỹ Tây - An Giang",
   tagline: "Dịch vụ cho thuê xe",
   owner: "Anh Trung",
 
