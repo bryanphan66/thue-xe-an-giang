@@ -86,12 +86,7 @@ không rành công nghệ → ưu tiên **gọi/Zalo** và **để lại SĐT ch
 → Hai file này là **cửa ngõ ngữ cảnh**; code là sự thật triển khai; specs cũ trong `docs/superpowers/specs/` là lịch sử quyết định.
 
 ## 14. Roadmap / còn thiếu
-- Ảnh xe thật (hero/gallery + **360° spin** ≥8 frame) → trải nghiệm tốt hơn nhiều.
-- File `.glb` 3D xe thật (hiện không bật model generic).
-- **ZNS** gửi xác nhận đặt xe (sau khi có MST + Zalo OA duyệt).
-- Google Business Profile verify (lên Maps).
-- Cân nhắc giảm tần suất FB post nếu reach giảm; thêm bài kèm ảnh.
-- (Tuỳ chọn) chuyển cron FB sang Dokploy nếu cần ổn định hơn GitHub Actions.
+→ Đã chuyển thành backlog có ưu tiên ở **§18 (Phần B)**. Tóm tắt 3 việc gấp nhất: **ảnh/360° thật**, **ZNS xác nhận đặt** (sau khi có MST + OA), **đưa đa chủ xe lên thật**.
 
 ---
 
