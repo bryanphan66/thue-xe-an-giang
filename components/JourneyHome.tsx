@@ -16,8 +16,18 @@ import {
   HeartHandshake,
   TreePalm,
   Ellipsis,
+  CheckCircle2,
   type LucideIcon,
 } from "lucide-react";
+
+const COMMITMENTS = [
+  "Giao xe tận nhà trong khu vực An Giang",
+  "Xe đời mới, sạch sẽ, máy lạnh mát",
+  "Tự lái hoặc có tài xế quen đường miền Tây",
+  "Giá rõ ràng theo số chỗ — không phát sinh lắt nhắt",
+  "Phục vụ đám cưới · du lịch · khám bệnh · sân bay · đi xa",
+  "Đặt nhanh: gọi/Zalo hoặc để lại SĐT, nhà xe gọi lại",
+];
 import ZaloIcon from "@/components/ZaloIcon";
 import { Link } from "@/i18n/navigation";
 import { BRAND } from "@/config/brand";
@@ -285,11 +295,21 @@ export default function JourneyHome({
           </div>
         </Chapter>
 
-        {/* 05 — Đánh giá */}
-        {testimonials.length > 0 && (
-          <Chapter n="05" tag="Đánh giá" label="Bà con tin tưởng">
+        {/* 05 — Cam kết (đánh giá thật của khách sẽ hiện ở đây khi có) */}
+        <Chapter n="05" tag="Cam kết" label="Vì sao chọn nhà xe">
+          <div>
+            {COMMITMENTS.map((c, i) => (
+              <Reveal key={i} delay={i * 50} variant="left">
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "14px 0", borderTop: "1px solid var(--hairline)", borderBottom: i === COMMITMENTS.length - 1 ? "1px solid var(--hairline)" : "none" }}>
+                  <CheckCircle2 size={22} style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span style={{ fontSize: 16, lineHeight: 1.5, letterSpacing: "-0.015em" }}>{c}</span>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          {testimonials.length > 0 && (
             <Reveal variant="scale">
-              <div className="marquee" style={{ marginLeft: -46, marginRight: -22 }}>
+              <div className="marquee" style={{ marginLeft: -46, marginRight: -22, marginTop: 24 }}>
                 <div className="marquee-track">
                   {tItems.map((t, i) => (
                     <div key={i} className="card tcard" style={{ padding: "20px 18px" }} aria-hidden={i >= testimonials.length}>
@@ -301,8 +321,8 @@ export default function JourneyHome({
                 </div>
               </div>
             </Reveal>
-          </Chapter>
-        )}
+          )}
+        </Chapter>
 
         {/* 06 — Đối tác */}
         <Chapter n="06" tag="Đối tác">

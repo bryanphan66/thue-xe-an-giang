@@ -53,11 +53,5 @@ export const fixtureCars: Car[] = [
   },
 ];
 
-export const fixtureTestimonials: Testimonial[] = [
-  { quote: "Xe sạch sẽ, anh tài xế chạy êm, tới bệnh viện đúng giờ hẹn. Lần sau tôi vẫn gọi.", name: "Cô Bảy", place: "xã Thạnh Mỹ Tây", stars: 5 },
-  { quote: "Thuê xe cưới ở đây rất ưng, xe đẹp mà giá phải chăng. Cảm ơn nhà xe.", name: "Anh Hùng", place: "Châu Phú", stars: 5 },
-  { quote: "Gọi một cuộc là có xe, đi xa yên tâm. Bác tài vui vẻ, đáng tin.", name: "Chị Lan", place: "TP. Long Xuyên", stars: 5 },
-  { quote: "Thuê tự lái về quê dịp Tết, thủ tục nhanh gọn, xe giao tận nhà. Rất hài lòng.", name: "Anh Phát", place: "Tân Châu", stars: 5 },
-  { quote: "Cả nhà đi du lịch Vũng Tàu, xe 7 chỗ rộng rãi, bác tài chạy an toàn.", name: "Cô Hạnh", place: "Chợ Mới", stars: 5 },
-  { quote: "Giá rõ ràng, không phát sinh lắt nhắt. Mình giới thiệu cho mấy người quen luôn.", name: "Anh Khoa", place: "Thoại Sơn", stars: 5 },
-];
+// KHÔNG dùng review giả. Để trống — chỉ hiện ĐÁNH GIÁ THẬT (Google/khách) sau khi thu thập được.
+export const fixtureTestimonials: Testimonial[] = [];

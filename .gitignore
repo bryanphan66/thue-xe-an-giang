@@ -43,3 +43,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 fb-post-preview.jpg
+
+# Ảnh gốc thả vào để xử lý (không commit; sẽ optimize + đẩy Supabase)
+incoming-photos/
