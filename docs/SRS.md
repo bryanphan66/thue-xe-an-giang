@@ -9,13 +9,13 @@ không rành công nghệ → ưu tiên **gọi/Zalo** và **để lại SĐT ch
 - **Thương hiệu (hiển thị):** "Dịch vụ cho thuê xe Thạnh Mỹ Tây - An Giang" · chủ xe **Anh Trung** (Hoàng Trung).
 - **Liên hệ:** ĐT/Zalo **0326 120 108** · địa chỉ Khu dân cư kênh 10, ấp Bờ Dâu, xã Thạnh Mỹ Tây, Tỉnh An Giang.
 - **Domain:** https://thuexeangiang.autocontent.click (Cloudflare → Dokploy/Traefik).
-- Tên hạ tầng (repo/Supabase/Dokploy) vẫn mang "trung-hieu" — chỉ là tên kỹ thuật.
+- Tên đồng bộ "an-giang" (repo/folder/session). Supabase ref/Dokploy id là chuỗi ngẫu nhiên (không đổi).
 
 ## 2. Stack & hạ tầng
 - **Next.js 16** (App Router, TS) + Tailwind v3 · next-intl (vi mặc định, không dò Accept-Language).
 - **Supabase** (Postgres) — dữ liệu xe/đánh giá/đơn; đọc phía server lúc RUNTIME (env `SUPABASE_URL`/`SUPABASE_ANON_KEY`, **không** NEXT_PUBLIC vì bị nướng cứng lúc build). Trang dữ liệu = `force-dynamic`.
 - **Dokploy** (Docker Swarm + Traefik, server 160.250.134.226) — host app (Dockerfile standalone).
-- **GitHub** repo `bryanphan66/thue-xe-trung-hieu`; **GitHub Actions** lo deploy + cron đăng FB.
+- **GitHub** repo `bryanphan66/thue-xe-an-giang`; **GitHub Actions** lo deploy + cron đăng FB.
 
 ## 3. Tính năng (đang chạy)
 - **Trang chủ V2 "Một hành trình"**: cột `.page` cuộn nội bộ + JourneyRail (mạch đen + xe chạy theo cuộn, đèn pha/phanh) + 8 chương tự biên đạo.

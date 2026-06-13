@@ -19,7 +19,7 @@ export const BRAND = {
   lng: 105.16464,
 
   // SEO — domain thật (đặt NEXT_PUBLIC_SITE_URL trên Vercel; mặc định placeholder).
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://thuexetrunghieu.vercel.app",
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "https://thuexeangiang.autocontent.click",
 } as const;
 
 export const tel = `tel:${BRAND.phoneRaw}`;

@@ -16,7 +16,7 @@
 ## 1. Lần đầu: tạo Supabase (làm 1 lần)
 
 1. Vào https://supabase.com → **Sign in** (đăng nhập bằng Google cho nhanh).
-2. Bấm **New project**. Đặt tên (vd `thue-xe-trung-hieu`), chọn region **Southeast Asia (Singapore)**, đặt **Database Password** (lưu lại).
+2. Bấm **New project**. Đặt tên (vd `thue-xe-an-giang`), chọn region **Southeast Asia (Singapore)**, đặt **Database Password** (lưu lại).
 3. Đợi vài phút cho project khởi tạo xong.
 
 ### 1.1. Tạo các bảng dữ liệu
@@ -138,7 +138,7 @@ Cho khách **vuốt để xoay xe** — nhìn như 3D nhưng là **ảnh thật 
    |----------|---------|
    | `NEXT_PUBLIC_SUPABASE_URL` | Project URL (mục 1.2) |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon public key (mục 1.2) |
-   | `NEXT_PUBLIC_SITE_URL` | địa chỉ web thật, vd `https://thuexetrunghieu.com` |
+   | `NEXT_PUBLIC_SITE_URL` | địa chỉ web thật, vd `https://thuexeangiang.autocontent.click` |
 
 3. Bấm **Redeploy** để web nạp biến mới. Xong → web chạy bằng **dữ liệu thật** từ Supabase.
 
