@@ -47,12 +47,13 @@ export default function ContactProvider({
   return (
     <ContactContext.Provider value={{ call: c.call, zalo: c.zalo, service: c.service, book: c.book }}>
       {children}
-      <StickyContactBar onCall={c.call} onZalo={c.zalo} />
+      <StickyContactBar onBook={() => c.book({ source: "sticky" })} onContact={c.call} />
       {c.open && (
         <ContactSheet
           open={c.open}
           cars={cars}
           onClose={c.close}
+          onBook={c.book}
           onPickCar={(slug) => {
             c.close();
             router.push(`/xe/${slug}`);

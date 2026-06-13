@@ -15,8 +15,10 @@ import {
   Stethoscope,
   HeartHandshake,
   TreePalm,
+  Ellipsis,
   type LucideIcon,
 } from "lucide-react";
+import ZaloIcon from "@/components/ZaloIcon";
 import { Link } from "@/i18n/navigation";
 import { BRAND } from "@/config/brand";
 import { SERVICES, type ServiceIcon } from "@/config/services";
@@ -37,6 +39,7 @@ const SVC_ICON: Record<ServiceIcon, LucideIcon> = {
   heart: HeartHandshake,
   palm: TreePalm,
   navigation: Navigation,
+  other: Ellipsis,
 };
 
 /** Vô lăng — lucide không có, dựng SVG nhỏ. */
@@ -142,7 +145,7 @@ function SeatGroupCard({
           style={{ marginTop: 8, width: "100%" }}
           onClick={onCall}
         >
-          Gọi tư vấn ngay
+          Liên hệ tư vấn
         </button>
       </div>
     </div>
@@ -204,7 +207,7 @@ export default function JourneyHome({
               <Phone size={19} /> Gọi ngay · {BRAND.phone}
             </button>
             <button className="btn btn-ghost-on-dark" onClick={zalo}>
-              <MessageCircle size={19} /> Nhắn Zalo
+              <ZaloIcon size={20} /> Nhắn Zalo
             </button>
           </div>
         </Reveal>
@@ -355,14 +358,18 @@ export default function JourneyHome({
 
         <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 2 }}>
           {[
-            { Icon: MapPin, label: BRAND.address, href: BRAND.mapLink, action: undefined as undefined | (() => void) },
-            { Icon: Phone, label: BRAND.phone, href: undefined, action: call },
-            { Icon: MessageCircle, label: "Zalo · " + BRAND.zalo, href: undefined, action: zalo },
-            { Icon: Globe, label: BRAND.facebook, href: `https://${BRAND.facebook}`, action: undefined },
+            { Icon: MapPin, zalo: false, label: BRAND.address, href: BRAND.mapLink, action: undefined as undefined | (() => void) },
+            { Icon: Phone, zalo: false, label: BRAND.phone, href: undefined, action: call },
+            { Icon: MessageCircle, zalo: true, label: "Zalo · " + BRAND.zalo, href: undefined, action: zalo },
+            { Icon: Globe, zalo: false, label: BRAND.facebook, href: `https://${BRAND.facebook}`, action: undefined },
           ].map((r, i) => {
             const inner = (
               <>
-                <r.Icon size={20} style={{ color: "var(--stage-muted)", flexShrink: 0 }} />
+                {r.zalo ? (
+                  <ZaloIcon size={20} />
+                ) : (
+                  <r.Icon size={20} style={{ color: "var(--stage-muted)", flexShrink: 0 }} />
+                )}
                 <span style={{ fontSize: 15.5, flex: 1 }}>{r.label}</span>
                 <ArrowUpRight size={17} style={{ color: "var(--stage-muted)" }} />
               </>

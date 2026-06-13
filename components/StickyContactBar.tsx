@@ -1,30 +1,35 @@
 "use client";
 
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, Headset } from "lucide-react";
 
 /**
- * StickyContactBar — thanh liên hệ kính mờ cố định đáy, căn giữa cột .page (max 448px).
- * Trồi lên khi tải (.stickybar animation). Cộng safe-area-inset-bottom (trong CSS).
+ * StickyContactBar — thanh liên hệ kính mờ cố định đáy, căn giữa cột .page.
+ * 2 lối: "Để nhà xe gọi lại" (mở form đặt nhanh) + "Liên hệ tư vấn ngay" (Gọi/Zalo).
  */
 export function StickyContactBar({
-  onCall,
-  onZalo,
+  onBook,
+  onContact,
 }: {
-  onCall: () => void;
-  onZalo: () => void;
+  onBook: () => void;
+  onContact: () => void;
 }) {
   return (
     <div className="stickybar">
-      <button type="button" className="btn btn-primary" onClick={onCall}>
-        <Phone size={18} /> Gọi ngay
+      <button
+        type="button"
+        className="btn btn-primary"
+        style={{ fontSize: 13.5, gap: 6, padding: "0 8px", whiteSpace: "nowrap" }}
+        onClick={onBook}
+      >
+        <Phone size={16} /> Để nhà xe gọi lại
       </button>
       <button
         type="button"
         className="btn btn-ghost"
-        onClick={onZalo}
-        style={{ background: "rgba(255,255,255,.55)" }}
+        style={{ fontSize: 13.5, gap: 6, padding: "0 8px", whiteSpace: "nowrap", background: "rgba(255,255,255,.55)" }}
+        onClick={onContact}
       >
-        <MessageCircle size={18} /> Nhắn Zalo
+        <Headset size={16} /> Liên hệ tư vấn ngay
       </button>
     </div>
   );

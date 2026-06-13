@@ -62,6 +62,7 @@ export async function submitBooking(input: BookingInput): Promise<SubmitResult> 
 
   const modeText = input.mode === "self" ? "Tự lái" : input.mode === "driver" ? "Có tài xế" : null;
   const summaryParts = [
+    input.purpose,
     input.seatsLabel,
     modeText,
     input.days ? `${input.days} ngày` : null,

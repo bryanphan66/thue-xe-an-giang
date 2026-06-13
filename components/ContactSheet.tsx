@@ -11,20 +11,23 @@ import {
   HeartHandshake,
   TreePalm,
   Navigation,
+  Ellipsis,
   type LucideIcon,
 } from "lucide-react";
 import { BRAND, tel, zaloLink } from "@/config/brand";
 import { SVC_SUGGEST, formatVnd, type ServiceIcon } from "@/config/services";
 import { groupCarsBySeats, type SeatGroup } from "@/lib/seatGroups";
 import { submitBooking } from "@/lib/actions";
+import ZaloIcon from "@/components/ZaloIcon";
 import type { Car } from "@/types/db";
-import type { ContactState } from "@/hooks/useContact";
+import type { ContactState, BookingContext } from "@/hooks/useContact";
 
 const SVC_ICON: Record<ServiceIcon, LucideIcon> = {
   stethoscope: Stethoscope,
   heart: HeartHandshake,
   palm: TreePalm,
   navigation: Navigation,
+  other: Ellipsis,
 };
 
 const inputClass =
@@ -40,11 +43,13 @@ export function ContactSheet({
   cars,
   onClose,
   onPickCar,
+  onBook,
 }: {
   open: ContactState;
   cars: Car[];
   onClose: () => void;
   onPickCar: (slug: string) => void;
+  onBook: (ctx: BookingContext) => void;
 }) {
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
@@ -69,6 +74,7 @@ export function ContactSheet({
   const modeText = ctx?.mode === "self" ? "Tự lái" : ctx?.mode === "driver" ? "Có tài xế" : null;
   const summaryRows: [string, string][] = ctx
     ? ([
+        ctx.purpose ? ["Dịch vụ", ctx.purpose] : null,
         ctx.seatsLabel ? ["Loại xe", ctx.seatsLabel] : null,
         modeText ? ["Hình thức", modeText] : null,
         ctx.days ? ["Số ngày", `${ctx.days} ngày`] : null,
@@ -93,6 +99,7 @@ export function ContactSheet({
       phone,
       name,
       source: ctx?.source ?? "book",
+      purpose: ctx?.purpose,
       seatsLabel: ctx?.seatsLabel,
       seats: ctx?.seats,
       mode: ctx?.mode,
@@ -135,7 +142,7 @@ export function ContactSheet({
                 <Phone size={19} /> Gọi luôn cho nhanh
               </a>
               <a href={zaloLink} target="_blank" rel="noreferrer" className="btn btn-ghost mt-2.5">
-                <MessageCircle size={19} /> Nhắn Zalo
+                <ZaloIcon size={20} /> Nhắn Zalo
               </a>
               <button type="button" onClick={onClose} className="btn btn-ghost mt-2.5 border-none">
                 Đóng
@@ -228,11 +235,20 @@ export function ContactSheet({
               </div>
             )}
 
-            <a href={tel} className="btn btn-primary mt-[18px]">
+            {isService && (
+              <button
+                type="button"
+                onClick={() => onBook({ source: "service", purpose: svc!.label })}
+                className="btn btn-primary mt-[18px]"
+              >
+                <Phone size={19} /> Để nhà xe gọi lại
+              </button>
+            )}
+            <a href={tel} className={isService ? "btn btn-ghost mt-2.5" : "btn btn-primary mt-[18px]"}>
               <Phone size={19} /> Gọi ngay
             </a>
             <a href={zaloLink} target="_blank" rel="noreferrer" className="btn btn-ghost mt-2.5">
-              <MessageCircle size={19} /> Nhắn Zalo
+              <ZaloIcon size={20} /> Nhắn Zalo
             </a>
             <button type="button" onClick={onClose} className="btn btn-ghost mt-2.5 border-none">
               Đóng

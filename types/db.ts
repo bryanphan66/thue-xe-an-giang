@@ -38,7 +38,8 @@ export type PartnerInquiryInput = {
 export type BookingInput = {
   phone: string;
   name?: string;
-  source?: string; // 'quote' | 'seat'
+  source?: string; // 'quote' | 'seat' | 'service' | 'sticky'
+  purpose?: string; // dịch vụ khách chọn
   seatsLabel?: string; // "7 chỗ"
   seats?: number;
   mode?: "driver" | "self";

@@ -5,7 +5,8 @@ import type { Service } from "@/config/services";
 
 /** Ngữ cảnh đính kèm khi khách đặt xe (từ báo giá hoặc thẻ số chỗ). */
 export type BookingContext = {
-  source: string; // 'quote' | 'seat'
+  source: string; // 'quote' | 'seat' | 'service' | 'sticky'
+  purpose?: string; // dịch vụ khách chọn, vd "Đám cưới · Rước dâu"
   seatsLabel?: string; // "7 chỗ"
   seats?: number;
   mode?: "driver" | "self";
