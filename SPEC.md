@@ -1,5 +1,8 @@
 # SPEC.md — Web App Giới Thiệu Dịch Vụ Cho Thuê Xe Vùng Quê
 
+> ⚠️ **Đây là spec GỐC (v1).** Dự án đã phát triển nhiều — xem **`docs/SRS.md`** để biết hiện trạng
+> (rebrand, UI V2, định giá theo số chỗ, đặt xe + Telegram, FB auto-post, deploy Dokploy/Actions…).
+>
 > Tài liệu kỹ thuật (spec) để đưa vào Claude Code. Đọc trước khi viết code.
 > Nguyên tắc xuyên suốt: **đơn giản tối đa cho người dùng không rành công nghệ (nông dân).**
 

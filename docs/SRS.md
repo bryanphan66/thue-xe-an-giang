@@ -1,0 +1,59 @@
+# SRS — Dịch vụ cho thuê xe Thạnh Mỹ Tây - An Giang (hiện trạng)
+
+> Tài liệu sống, phản ánh trạng thái thực tế. Cập nhật: 2026-06-13.
+> Lịch sử ban đầu xem `SPEC.md`; các quyết định thiết kế lẻ ở `docs/superpowers/specs/`.
+
+## 1. Tổng quan
+Web giới thiệu + nhận khách cho dịch vụ cho thuê ô tô vùng quê (An Giang). Khách: bà con
+không rành công nghệ → ưu tiên **gọi/Zalo** và **để lại SĐT cho nhà xe gọi lại**.
+- **Thương hiệu (hiển thị):** "Dịch vụ cho thuê xe Thạnh Mỹ Tây - An Giang" · chủ xe **Anh Trung** (Hoàng Trung).
+- **Liên hệ:** ĐT/Zalo **0326 120 108** · địa chỉ Khu dân cư kênh 10, ấp Bờ Dâu, xã Thạnh Mỹ Tây, Tỉnh An Giang.
+- **Domain:** https://thuexeangiang.autocontent.click (Cloudflare → Dokploy/Traefik).
+- Tên hạ tầng (repo/Supabase/Dokploy) vẫn mang "trung-hieu" — chỉ là tên kỹ thuật.
+
+## 2. Stack & hạ tầng
+- **Next.js 16** (App Router, TS) + Tailwind v3 · next-intl (vi mặc định, không dò Accept-Language).
+- **Supabase** (Postgres) — dữ liệu xe/đánh giá/đơn; đọc phía server lúc RUNTIME (env `SUPABASE_URL`/`SUPABASE_ANON_KEY`, **không** NEXT_PUBLIC vì bị nướng cứng lúc build). Trang dữ liệu = `force-dynamic`.
+- **Dokploy** (Docker Swarm + Traefik, server 160.250.134.226) — host app (Dockerfile standalone).
+- **GitHub** repo `bryanphan66/thue-xe-trung-hieu`; **GitHub Actions** lo deploy + cron đăng FB.
+
+## 3. Tính năng (đang chạy)
+- **Trang chủ V2 "Một hành trình"**: cột `.page` cuộn nội bộ + JourneyRail (mạch đen + xe chạy theo cuộn, đèn pha/phanh) + 8 chương tự biên đạo.
+  - 01 Dịch vụ (khám bệnh/cưới/du lịch/đi xa/**Việc khác**) → ContactSheet gợi ý loại số chỗ + "Để nhà xe gọi lại".
+  - 02 **Thuê theo SỐ CHỖ** (5 chỗ / 8 chỗ…) — giá tài xế/tự lái, giá gạch + chip "Ưu đãi", kèm xe thật.
+  - 03 Báo giá nhanh (chọn số chỗ → hình thức → ngày → đi xa → tạm tính → đặt).
+  - 04 Tự lái/tài xế · 05 Đánh giá (marquee) · 06 Đối tác · 07 Vị trí (OSM) · 08 Footer.
+- **Định giá theo SỐ CHỖ**: gom xe theo `seats` (`lib/seatGroups.ts`), giá lấy từ xe rẻ nhất ("từ" nếu nhiều xe). KHÔNG theo hãng.
+- **Đặt xe nhanh (1 SĐT)**: ContactSheet mode `book` → server action `submitBooking` → lưu Supabase `bookings` + **báo Telegram** cho chủ xe. Tự kèm ngữ cảnh (số chỗ/hình thức/ngày/tạm tính/dịch vụ). Best-effort: lỗi backend không chặn khách.
+- **ContactSheet 4 kiểu**: call / zalo / service (gợi ý số chỗ) / book (form). Nút Zalo dùng logo Zalo. Thanh sticky: "Để nhà xe gọi lại" + "Liên hệ tư vấn ngay".
+- **Chi tiết xe** `/xe/[slug]`: hero theo thứ tự 360° (≥8 frame) > model `.glb` > ảnh thật > placeholder sạch; gallery, bảng giá (giá gạch), OwnerCard.
+- **SEO**: metadata/OpenGraph, schema.org (AutoRental + Product), sitemap, robots, favicon.
+
+## 4. Mô hình dữ liệu (Supabase)
+- `owners`, `cars` (slug, name, type, seats, price_with_driver, price_self_drive, badge, photo_count, model_3d_url, available, featured, owner_id), `car_photos` (url, sort_order, **kind**: photo|spin_frame), `testimonials` (approved), `partner_inquiries`, **`bookings`** (phone, name, seats, mode, days, far, total, note, source, status).
+- RLS: public read (owners/cars/photos/approved testimonials); public insert (partner_inquiries, testimonials, bookings).
+- **Khuyến mãi** (giá gạch + nhãn) để ở code `config/promos.ts` theo slug — không trong DB.
+- Dữ liệu thật hiện tại: 2 xe — **Kia K5 GT-Line (5 chỗ)**, **Toyota Innova 2019 (8 chỗ)**.
+
+## 5. Tích hợp & lịch chạy (CRON)
+- **Deploy:** GitHub Actions `deploy.yml` (on push `main`) → gọi Dokploy API `application.deploy`. Secret `DOKPLOY_API_KEY`.
+- **FB auto-post:** GitHub Actions `fb-post.yml` — **cron `0 1,5,11 * * *` (3 lần/ngày 8/12/18h VN)** + chạy tay. `scripts/fb-post.mjs` đọc xe Supabase → **Groq** (llama-3.3-70b) tạo bài biến hoá (fallback mẫu tĩnh) → Graph API `POST /{page}/feed`. Page Graph id **1147502741786246**.
+- **Telegram báo đơn:** realtime trong server action (env Dokploy), bot **@May_2108_bot** → chat id chủ xe.
+
+## 6. Biến môi trường / Secrets (chỉ tên — giá trị không lưu ở repo)
+- **Dokploy (runtime):** `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_URL/ANON_KEY`, `NEXT_PUBLIC_SITE_URL`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
+- **GitHub Secrets:** `DOKPLOY_API_KEY`, `FB_PAGE_TOKEN`, `FB_PAGE_ID`, `GROQ_API_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
+- **Local `.env.local` (không commit):** + `SUPABASE_SERVICE_ROLE_KEY` (chỉ dùng quản trị từ máy).
+
+## 7. Ngoài code / thủ công (chủ xe lo)
+- **Hộ kinh doanh:** đã nộp hồ sơ online (số OH-0745385/26), chờ "Đã cấp" (~17–18/6) để lấy MST.
+- **Zalo OA:** đang chờ duyệt (OA "Dịch vụ cho thuê xe Thạnh Mỹ Tây - AG"); cần MST chứng thực để mở **ZNS**. Công văn ở `~/Downloads/zalooa_congvan_*`.
+- **Google Business Profile (Maps):** loại "Dịch vụ", danh mục "Car rental agency" — tạo + xác minh thủ công.
+- **Facebook Page:** đã tạo + app riêng "Thuê Xe An Giang" + auto-post.
+- **Còn thiếu:** ảnh xe thật (hero/gallery/360°), file `.glb` 3D.
+
+## 8. Vận hành thường ngày
+- Sửa giá / thêm xe / bật-tắt `available` → **Supabase Table Editor** (bảng `cars`). Web tự gom theo số chỗ, FB post lần sau tự cập nhật.
+- Xem đơn đặt xe → bảng **`bookings`** (status: new→called→booked) + Telegram.
+- FB: tự đăng 3 lần/ngày; muốn đăng thêm → GitHub Actions → "Auto-post to Facebook Page" → Run (có dry-run).
+- Khuyến mãi/nhãn → `config/promos.ts`. Liên hệ/thương hiệu → `config/brand.ts`.
