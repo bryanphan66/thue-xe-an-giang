@@ -37,13 +37,15 @@ async function importCar(slug) {
   if (!files.length) { console.log(`• ${slug}: chưa có ảnh`); return; }
   const { data: car } = await sb.from("cars").select("id").eq("slug", slug).maybeSingle();
   if (!car) { console.log(`⚠ ${slug}: không có xe slug này trong DB`); return; }
-  // Xoá ảnh thường cũ (kind='photo') để chạy lại sạch; giữ spin_frame nếu có
-  await sb.from("car_photos").delete().eq("car_id", car.id).eq("kind", "photo");
+  // Xoá ảnh cũ của xe để chạy lại sạch. (DB hiện CHƯA có cột `kind` → không insert kind;
+  //  data layer coi ảnh không có kind là ảnh thường. Khi thêm 360°/kind thì chừa spin_frame.)
+  await sb.from("car_photos").delete().eq("car_id", car.id);
   let i = 0;
   for (const f of files) {
     const buf = await optimize(join(dir, f));
     const url = await uploadPublic(`${slug}/${String(i).padStart(2, "0")}.jpg`, buf);
-    await sb.from("car_photos").insert({ car_id: car.id, url, sort_order: i, kind: "photo" });
+    const { error } = await sb.from("car_photos").insert({ car_id: car.id, url, sort_order: i });
+    if (error) { console.error(`  ✗ insert lỗi (${f}): ${error.message}`); }
     i++;
   }
   console.log(`✓ ${slug}: ${i} ảnh → web`);
