@@ -23,6 +23,8 @@ jobs:
         with:
           node-version: "22"
       - run: npm ci
+      - name: Install Chromium (render ảnh poster)
+        run: npx playwright install --with-deps chromium
       - name: Post fleet & prices to Facebook
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

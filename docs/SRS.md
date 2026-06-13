@@ -37,7 +37,7 @@ không rành công nghệ → ưu tiên **gọi/Zalo** và **để lại SĐT ch
 
 ## 5. Tích hợp & lịch chạy (CRON)
 - **Deploy:** GitHub Actions `deploy.yml` (on push `main`) → gọi Dokploy API `application.deploy`. Secret `DOKPLOY_API_KEY`.
-- **FB auto-post:** GitHub Actions `fb-post.yml` — **cron `0 1,5,11 * * *` (3 lần/ngày 8/12/18h VN)** + chạy tay. `scripts/fb-post.mjs` đọc xe Supabase → **Groq** (llama-3.3-70b) tạo bài biến hoá (fallback mẫu tĩnh) → Graph API `POST /{page}/feed`. Page Graph id **1147502741786246**.
+- **FB auto-post:** GitHub Actions `fb-post.yml` — **cron `0 1,5,11 * * *` (3 lần/ngày 8/12/18h VN)** + chạy tay. `scripts/fb-post.mjs` đọc xe Supabase → **Groq** (llama-3.3-70b, JSON) tạo **caption + tiêu đề** biến hoá → ghép tiêu đề lên **ảnh xe thật** (`scripts/poster.mjs`, 2 layout, render Playwright→sharp) → đăng **bài ẢNH** `POST /{page}/photos`; lỗi render/đăng thì **fallback** bài chữ `/feed`. Giá/SĐT/tên xe lấy từ dữ liệu (AI không bịa số). Workflow có bước cài Chromium. Page Graph id **1147502741786246**.
 - **Telegram báo đơn:** realtime trong server action (env Dokploy), bot **@May_2108_bot** → chat id chủ xe.
 
 ## 6. Biến môi trường / Secrets (chỉ tên — giá trị không lưu ở repo)

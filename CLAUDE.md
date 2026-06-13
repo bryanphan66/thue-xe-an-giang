@@ -15,7 +15,7 @@ Web cho thuê xe vùng quê (An Giang). **Hiện trạng đầy đủ: đọc `d
 - `components/` — `JourneyHome` (8 chương), `JourneyRail`, `HeroShowcase`, `QuickQuote`, `ContactSheet` (4 mode), `ContactProvider`, `StickyContactBar`, `Car3DViewer`, `Car360`, `CarGallery`, `PriceTable`, `OwnerCard`, `ZaloIcon`…
 - `lib/` — `data.ts` (đọc Supabase + fixtures), `seatGroups.ts` (gom theo số chỗ), `actions.ts` (server actions: partner + **submitBooking** + Telegram), `seo.ts`, `supabase.ts`.
 - `config/` — `brand.ts` (thương hiệu/liên hệ), `services.ts` (dịch vụ + SVC_SUGGEST), `promos.ts` (giá gạch/nhãn ưu đãi theo slug).
-- `hooks/` — `useContact.ts`, `useReveal.ts`. `scripts/fb-post.mjs` (Groq → FB tự động), `scripts/fb-page.mjs` (cập nhật thông tin Page + đăng/ghim bài giới thiệu — chạy tay, cần Page token có `pages_manage_metadata`+`pages_manage_posts` trong `.env.local`), `scripts/make-og.mjs` (sinh `public/og.jpg` 1200×630 từ ảnh thật + thương hiệu, Playwright). `public/cars/` ảnh thật tối ưu (innova/storefront). `supabase/*.sql`. `docs/SRS.md`.
+- `hooks/` — `useContact.ts`, `useReveal.ts`. `scripts/poster.mjs` (module render ảnh dùng chung: ảnh xe thật + chữ, 2 layout, Playwright→sharp), `scripts/fb-post.mjs` (FB tự động **bài ẢNH**: Groq tạo caption+tiêu đề JSON → ghép lên ảnh → đăng `/photos`, lỗi thì fallback `/feed`), `scripts/fb-page.mjs` (cập nhật thông tin Page + đăng/ghim bài giới thiệu — chạy tay, cần Page token có `pages_manage_metadata`+`pages_manage_posts` trong `.env.local`), `scripts/make-og.mjs` (sinh `public/og.jpg` qua `poster.mjs`). `public/cars/` ảnh thật tối ưu (innova/storefront). `supabase/*.sql`. `docs/SRS.md`.
 - **SEO**: `lib/seo.ts` = LocalBusiness(AutoRental) + Product/Offer + **FAQPage** (trang chủ) + **BreadcrumbList** (trang xe). OG/twitter (`summary_large_image`) trỏ `/og.jpg`. Sitemap có `lastModified`. Đổi ảnh OG → chạy lại `node scripts/make-og.mjs`.
 
 ## ⚠️ BẪY QUAN TRỌNG (đừng phá)
@@ -39,7 +39,7 @@ Web cho thuê xe vùng quê (An Giang). **Hiện trạng đầy đủ: đọc `d
 - **Giá / xe / bật-tắt available**: Supabase Table Editor (bảng `cars`). Web tự gom theo số chỗ.
 - **Khuyến mãi**: `config/promos.ts` · **Thương hiệu/liên hệ**: `config/brand.ts` · **Dịch vụ**: `config/services.ts`.
 - **Đơn đặt xe**: bảng `bookings` (status new→called→booked) + báo Telegram (@May_2108_bot).
-- **Nội dung FB post**: `scripts/fb-post.mjs` (Groq prompt + fallback tĩnh).
+- **Nội dung FB post**: `scripts/fb-post.mjs` (Groq tạo caption+tiêu đề; ảnh ghép từ `poster.mjs`). Giá/SĐT/tên xe lấy từ dữ liệu — KHÔNG để AI bịa số. Thêm ảnh xe → bỏ vào `public/cars/` (bỏ `storefront.jpg` khỏi poster). Workflow `fb-post.yml` có bước `npx playwright install chromium` để render trong CI.
 
 ## Secrets (chỉ tên — xem SRS §6)
 Dokploy env: `SUPABASE_URL/ANON_KEY`, `NEXT_PUBLIC_*`, `NEXT_PUBLIC_SITE_URL`, `TELEGRAM_BOT_TOKEN/CHAT_ID`.

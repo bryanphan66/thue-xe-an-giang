@@ -1,7 +1,9 @@
-// Tự đăng bài Facebook — nội dung do AI (Groq) tạo, biến hoá mỗi lần để tránh trùng.
-// Đọc xe/giá từ Supabase → Groq soạn bài (fallback mẫu tĩnh nếu lỗi) → POST /{page}/feed.
-// DRY_RUN=1 chỉ in, không đăng.
+// Tự đăng bài Facebook dạng ẢNH: ảnh xe thật + tiêu đề do AI (Groq) biến hoá mỗi lần → đa dạng,
+// không trùng. Giá/SĐT/tên xe lấy từ dữ liệu (KHÔNG để AI bịa). Đăng /photos; lỗi thì fallback /feed.
+// DRY_RUN=1 chỉ render ảnh + in caption, KHÔNG đăng.
+import { readdirSync, writeFileSync } from "node:fs";
 import { createClient } from "@supabase/supabase-js";
+import { renderPoster, ACCENTS } from "./poster.mjs";
 
 const {
   SUPABASE_URL, SUPABASE_ANON_KEY,
@@ -11,7 +13,10 @@ const {
 
 const PHONE = "0326 120 108";
 const SITE = "https://thuexeangiang.autocontent.click";
+const SITE_HOST = "thuexeangiang.autocontent.click";
+const G = "https://graph.facebook.com/v21.0";
 const vnd = (n) => Number(n).toLocaleString("vi-VN");
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
 const THEMES = [
   "đám cưới · rước dâu (xe đẹp, tài xế lịch sự)",
@@ -22,6 +27,15 @@ const THEMES = [
   "gia đình đi chơi cuối tuần",
   "ra sân bay đúng giờ, không lo trễ chuyến",
   "giới thiệu chung đội xe + giá tốt",
+];
+
+const STATIC_HEADLINES = [
+  "Xe đẹp, tài xế vui — đi là mê",
+  "Giao xe tận nhà, gọi là có",
+  "Rước dâu xe sang, trọn ngày vui",
+  "Về quê đón Tết, đặt xe sớm nha",
+  "Đi xa yên tâm, giá quê dễ chịu",
+  "Cả nhà đi chơi, xe rộng mát lạnh",
 ];
 
 async function getFleet() {
@@ -40,6 +54,7 @@ async function getFleet() {
   }));
 }
 
+// Cho caption (text bài)
 function priceLines(fleet) {
   return fleet.map((g) => {
     const d = g.driver ? `tài xế ${g.driver}đ` : null;
@@ -47,42 +62,47 @@ function priceLines(fleet) {
     return `🚙 ${g.seats} chỗ — ${[d, s].filter(Boolean).join(" · ")}/ngày`;
   }).join("\n");
 }
+// Cho ẢNH (ngắn gọn, không emoji)
+function priceLinesShort(fleet) {
+  return fleet.map((g) => {
+    const d = g.driver ? `tài xế ${g.driver}` : null;
+    const s = g.self ? `tự lái ${g.self}` : null;
+    return `${g.seats} chỗ · ${[d, s].filter(Boolean).join(" · ")}`;
+  });
+}
 
-// Bài mẫu tĩnh (fallback khi Groq lỗi)
 function staticPost(fleet) {
   return [
-    "🚗 THUÊ XE AN GIANG — BẢNG GIÁ THEO SỐ CHỖ",
-    "",
-    priceLines(fleet),
-    "",
+    "🚗 THUÊ XE AN GIANG — BẢNG GIÁ THEO SỐ CHỖ", "",
+    priceLines(fleet), "",
     "✅ Có tài xế hoặc tự lái",
     "✅ Đám cưới · du lịch · khám bệnh · ra sân bay · đi xa",
-    "✅ Xe đời mới, sạch sẽ, đúng giờ — giao xe tận nhà",
-    "",
+    "✅ Xe đời mới, sạch sẽ, đúng giờ — giao xe tận nhà", "",
     `📞 Gọi / Zalo: ${PHONE}`,
     `🌐 Xem xe & đặt nhanh: ${SITE}`,
   ].join("\n");
 }
 
-async function aiPost(fleet) {
-  if (!GROQ_API_KEY) return null;
-  const hour = (new Date().getUTCHours() + 7) % 24; // giờ Việt Nam
+// Groq trả JSON {caption, headline}. headline ngắn để ghép lên ảnh.
+async function aiContent(fleet) {
+  const fallback = { caption: staticPost(fleet), headline: pick(STATIC_HEADLINES) };
+  if (!GROQ_API_KEY) return fallback;
+  const hour = (new Date().getUTCHours() + 7) % 24;
   const buoi = hour < 11 ? "buổi sáng" : hour < 15 ? "buổi trưa" : "buổi chiều/tối";
-  const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+  const theme = pick(THEMES);
 
   const system =
-    "Bạn viết nội dung Facebook cho một nhà xe cho thuê ô tô ở vùng quê An Giang. " +
-    "Văn mộc mạc, thân thiện, gần gũi bà con; ngắn gọn ~6-10 dòng; emoji vừa phải. " +
-    "TUYỆT ĐỐI không bịa thông tin ngoài dữ liệu được cho. Phải có giá đúng như dữ liệu, " +
-    "số điện thoại và website. Tránh giật tít kiểu 'BREAKING/SỐC/HOT', không bọc bài trong dấu ngoặc kép. " +
-    "Chỉ trả về nội dung bài đăng, không giải thích.";
+    "Bạn viết nội dung Facebook cho nhà xe cho thuê ô tô ở vùng quê An Giang. Văn mộc mạc, thân thiện. " +
+    "TUYỆT ĐỐI không bịa thông tin/giá ngoài dữ liệu. Tránh giật tít 'SỐC/HOT'. " +
+    'Chỉ trả về JSON đúng dạng: {"caption": string, "headline": string}. ' +
+    "caption: bài đăng ~6-10 dòng, có giá đúng, số điện thoại và website, emoji vừa phải. " +
+    "headline: MỘT câu tiêu đề thật NGẮN (tối đa 8 chữ) để in lên ảnh, KHÔNG chứa số/giá, không dấu ngoặc kép.";
   const user =
     `Tên nhà xe: Dịch vụ cho thuê xe Thạnh Mỹ Tây - An Giang\n` +
     `Bảng giá (đ/ngày, dùng đúng số này):\n${priceLines(fleet)}\n` +
     `Có cả tự lái và có tài xế. Phục vụ: khám bệnh, đám cưới-rước dâu, du lịch, sân bay, đi xa.\n` +
     `Điện thoại/Zalo: ${PHONE}\nWebsite: ${SITE}\n\n` +
-    `Hãy viết MỘT bài Facebook ${buoi}, nhấn vào chủ đề: "${theme}". ` +
-    `Mỗi lần viết phải KHÁC nhau (mở đầu, cách diễn đạt). Có giá, có lời kêu gọi gọi/Zalo, có website.`;
+    `Viết bài ${buoi}, nhấn chủ đề: "${theme}". Mỗi lần phải KHÁC nhau.`;
 
   try {
     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -90,42 +110,85 @@ async function aiPost(fleet) {
       headers: { Authorization: `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        temperature: 1.05,
-        max_tokens: 500,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
+        temperature: 1.05, max_tokens: 700,
+        response_format: { type: "json_object" },
+        messages: [{ role: "system", content: system }, { role: "user", content: user }],
       }),
     });
     const d = await res.json();
-    const text = d?.choices?.[0]?.message?.content?.trim();
-    return text || null;
+    const obj = JSON.parse(d?.choices?.[0]?.message?.content ?? "{}");
+    let caption = (obj.caption || "").trim();
+    let headline = (obj.headline || "").trim().replace(/^["'“”]+|["'“”]+$/g, "");
+    if (!caption) return fallback;
+    if (!headline || headline.length > 42) headline = pick(STATIC_HEADLINES); // giữ ảnh gọn
+    return { caption, headline };
   } catch {
-    return null;
+    return fallback;
   }
 }
 
+function pickPhoto() {
+  let files = [];
+  try {
+    files = readdirSync("public/cars").filter((f) => /\.(jpe?g|png)$/i.test(f) && f !== "storefront.jpg");
+  } catch { /* ignore */ }
+  if (!files.length) files = ["innova.jpg"];
+  return "public/cars/" + pick(files);
+}
+
+async function postPhoto(caption, buffer) {
+  const fd = new FormData();
+  fd.append("caption", caption);
+  fd.append("access_token", FB_PAGE_TOKEN);
+  fd.append("source", new Blob([buffer], { type: "image/jpeg" }), "poster.jpg");
+  const r = await fetch(`${G}/${FB_PAGE_ID}/photos`, { method: "POST", body: fd });
+  return r.json();
+}
+async function postText(message) {
+  const r = await fetch(`${G}/${FB_PAGE_ID}/feed`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, access_token: FB_PAGE_TOKEN }),
+  });
+  return r.json();
+}
+
+// ---- Run ----
 const fleet = await getFleet();
-let message = (await aiPost(fleet)) || staticPost(fleet);
-message = message.replace(/^["'“”‘’]+/, "").replace(/["'“”‘’]+$/, "").trim();
-// đảm bảo luôn có SĐT + website (phòng AI quên)
+const { caption, headline } = await aiContent(fleet);
+
+let message = caption.replace(/^["'“”‘’]+/, "").replace(/["'“”‘’]+$/, "").trim();
 if (!message.includes(PHONE)) message += `\n\n📞 Gọi / Zalo: ${PHONE}`;
 if (!message.includes("thuexeangiang")) message += `\n🌐 ${SITE}`;
 
+// Render ảnh (best-effort)
+let buffer = null;
+try {
+  buffer = await renderPoster({
+    photoPath: pickPhoto(),
+    template: Math.random() < 0.5 ? "split" : "banner",
+    eyebrow: "Thuê xe · An Giang",
+    headline,
+    lines: priceLinesShort(fleet),
+    phone: PHONE, site: SITE_HOST,
+    accent: pick(ACCENTS),
+  });
+} catch (e) {
+  console.error("Render ảnh lỗi (sẽ đăng bài chữ):", e.message);
+}
+
 if (DRY_RUN) {
-  console.log("----- DRY RUN (không đăng) -----\n" + message);
+  console.log("----- DRY RUN -----\nHEADLINE:", headline, "\n\nCAPTION:\n" + message);
+  if (buffer) { writeFileSync("fb-post-preview.jpg", buffer); console.log("\nĐã lưu ảnh xem trước: fb-post-preview.jpg"); }
+  else console.log("\n(Không render được ảnh)");
   process.exit(0);
 }
 
-const res = await fetch(`https://graph.facebook.com/v21.0/${FB_PAGE_ID}/feed`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ message, access_token: FB_PAGE_TOKEN }),
-});
-const out = await res.json();
-if (out.error) {
-  console.error("FB error:", out.error.message);
-  process.exit(1);
+let out;
+if (buffer) {
+  out = await postPhoto(message, buffer);
+  if (out.error) { console.error("Đăng ảnh lỗi, fallback bài chữ:", out.error.message); out = await postText(message); }
+} else {
+  out = await postText(message);
 }
-console.log("Đã đăng FB, post id:", out.id);
+if (out.error) { console.error("FB error:", out.error.message); process.exit(1); }
+console.log("Đã đăng FB:", out.post_id || out.id);
