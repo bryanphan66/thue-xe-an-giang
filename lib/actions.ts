@@ -68,14 +68,28 @@ export async function submitPartnerInquiry(
   if (rateLimited(`pa:ip:${ip}`, { max: 4 }) || rateLimited(`pa:ph:${phone}`, { max: 2, minGapMs: 30_000 }))
     return { ok: true }; // âm thầm bỏ qua, không để lộ
 
-  if (!supabase) return { ok: true };
-  const { error } = await supabase.from("partner_inquiries").insert({
-    name,
-    phone,
-    car_info: input.carInfo?.trim().slice(0, 200) || null,
-    note: input.note?.trim().slice(0, 500) || null,
-  });
-  return { ok: !error };
+  const carInfo = input.carInfo?.trim().slice(0, 200) || null;
+  const note = input.note?.trim().slice(0, 500) || null;
+
+  // Lưu Supabase (best-effort).
+  if (supabase) {
+    try {
+      await supabase.from("partner_inquiries").insert({ name, phone, car_info: carInfo, note });
+    } catch {
+      // bảng chưa tạo / lỗi mạng → vẫn báo Telegram + trả ok
+    }
+  }
+
+  // Báo Telegram cho chủ xe (để không bỏ lỡ đối tác).
+  const lines = [
+    "🤝 <b>Đăng ký đối tác mới</b>",
+    `📞 SĐT: <b>${esc(phone)}</b> · ${esc(name)}`,
+    carInfo ? `🚗 ${esc(carInfo)}` : "",
+    note ? `📝 ${esc(note)}` : "",
+  ].filter(Boolean);
+  await notifyTelegram(lines.join("\n"));
+
+  return { ok: true };
 }
 
 /**

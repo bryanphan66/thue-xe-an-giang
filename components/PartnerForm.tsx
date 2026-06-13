@@ -23,6 +23,7 @@ export default function PartnerForm() {
       phone: String(fd.get("phone") || ""),
       carInfo: String(fd.get("carInfo") || ""),
       note: String(fd.get("note") || ""),
+      hp: String(fd.get("company") || ""),
     });
     setStatus(res.ok ? "ok" : "error");
   }
@@ -64,6 +65,15 @@ export default function PartnerForm() {
       onSubmit={onSubmit}
       style={{ marginTop: 26, display: "flex", flexDirection: "column", gap: 12 }}
     >
+      {/* Honeypot: ẩn với người thật, bot tự điền → server bỏ qua */}
+      <input
+        name="company"
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
       <input
         name="name"
         type="text"
