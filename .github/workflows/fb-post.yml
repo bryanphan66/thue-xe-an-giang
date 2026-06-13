@@ -1,9 +1,9 @@
 name: Auto-post to Facebook Page
 
-# Tự đăng bảng giá lên Page: theo lịch (thứ 2 hàng tuần, 08:00 giờ VN) + bấm chạy tay.
+# Tự đăng bài (nội dung AI) lên Page: 3 lần/ngày + bấm chạy tay.
 on:
   schedule:
-    - cron: "0 1 * * 1" # 01:00 UTC = 08:00 Việt Nam, mỗi thứ Hai
+    - cron: "0 1,5,11 * * *" # 08:00 · 12:00 · 18:00 giờ Việt Nam (UTC+7)
   workflow_dispatch:
     inputs:
       dry_run:
@@ -29,5 +29,6 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '' }}
         run: node scripts/fb-post.mjs
