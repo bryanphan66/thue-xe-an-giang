@@ -3,6 +3,10 @@ import { BRAND } from "@/config/brand";
 import { routing } from "@/i18n/routing";
 import { getCars } from "@/lib/data";
 
+// Đọc Supabase lúc chạy (không phải lúc build) — nếu không sitemap rơi về
+// fixtures cũ (vios/cx5/transit) vì build không có env Supabase. Xem BẪY #1.
+export const dynamic = "force-dynamic";
+
 /** Sitemap đa ngôn ngữ: trang chủ, đối tác và mọi xe — cho mỗi locale. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = BRAND.siteUrl.replace(/\/$/, "");
